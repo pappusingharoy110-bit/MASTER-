@@ -461,46 +461,87 @@
     setLoading(true);
     hideError();
 
-    const targetWord = query.trim().split(/\s+/)[0].replace(/[^a-zA-Z]/g, '');
+    // Extract potential search words (keep letters, spaces, hyphens, and apostrophes)
+    const cleaned = query.trim().replace(/[^a-zA-Z\s'-]/g, '');
+    const words = cleaned.split(/\s+/).filter(Boolean);
+
+    if (words.length === 0) {
+      showError("Please enter a valid English word or phrase.");
+      setLoading(false);
+      return;
+    }
+
+    // Attempt searching candidates: full string first, then individual words
+    const candidates = [...new Set([words.join('-'), words.join(''), ...words])];
+    let entry = null;
+    let searchedWord = "";
+
+    for (const word of candidates) {
+      const sanitized = word.replace(/[^a-zA-Z-]/g, '').toLowerCase();
+      if (!sanitized) continue;
+
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(sanitized)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            entry = data[0];
+            searchedWord = sanitized;
+            break;
+          }
+        }
+      } catch (e) {
+        // Ignore single word failure and continue trying candidates
+      }
+    }
+
+    if (!entry) {
+      showError("Couldn't find a definition for that word or phrase. Please check your spelling!");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(targetWord)}`);
-      
-      if (!res.ok) throw new Error("not_found");
-
-      const data = await res.json();
-      const entry = data[0];
-      const primaryMeaning = entry.meanings[0] || {};
-      const primaryDef = primaryMeaning.definitions[0] || {};
+      const meanings = Array.isArray(entry.meanings) ? entry.meanings : [];
+      const primaryMeaning = meanings[0] || {};
+      const primaryDef = (primaryMeaning.definitions && primaryMeaning.definitions[0]) || {};
 
       let syns = [];
-      entry.meanings.forEach(m => {
-        if (m.synonyms) syns.push(...m.synonyms);
-        m.definitions.forEach(d => {
-          if (d.synonyms) syns.push(...d.synonyms);
-        });
+      meanings.forEach(m => {
+        if (Array.isArray(m.synonyms)) syns.push(...m.synonyms);
+        if (Array.isArray(m.definitions)) {
+          m.definitions.forEach(d => {
+            if (Array.isArray(d.synonyms)) syns.push(...d.synonyms);
+          });
+        }
       });
       syns = [...new Set(syns)].slice(0, 5);
 
       let exampleText = "";
-      for (const m of entry.meanings) {
-        for (const d of m.definitions) {
-          if (d.example) {
-            exampleText = d.example;
-            break;
+      for (const m of meanings) {
+        if (Array.isArray(m.definitions)) {
+          for (const d of m.definitions) {
+            if (d.example) {
+              exampleText = d.example;
+              break;
+            }
           }
         }
         if (exampleText) break;
       }
 
-      const phonetics = entry.phonetic || (entry.phonetics.find(p => p.text)?.text) || "";
+      let phoneticsText = entry.phonetic || "";
+      if (!phoneticsText && Array.isArray(entry.phonetics)) {
+        const pObj = entry.phonetics.find(p => p && p.text);
+        if (pObj) phoneticsText = pObj.text;
+      }
 
       const parsed = {
-        term: entry.word,
-        pronunciation: phonetics,
+        term: entry.word || searchedWord,
+        pronunciation: phoneticsText,
         partOfSpeech: primaryMeaning.partOfSpeech || "",
         simple: primaryDef.definition || "No simple definition available.",
-        explanation: entry.meanings.map(m => `(${m.partOfSpeech}) ${m.definitions[0]?.definition || ''}`).filter(Boolean).slice(0, 2).join(' '),
+        explanation: meanings.map(m => `(${m.partOfSpeech || 'def'}) ${m.definitions?.[0]?.definition || ''}`).filter(b => b.trim().length > 6).slice(0, 2).join(' '),
         example: exampleText ? `"${exampleText}"` : "",
         synonyms: syns
       };
@@ -511,7 +552,7 @@
       input.style.height = 'auto';
 
     } catch (err) {
-      showError();
+      showError("An unexpected error occurred while parsing the word definition.");
     } finally {
       setLoading(false);
     }
@@ -522,8 +563,8 @@
     loadingRow.classList.toggle('visible', isLoading);
   }
 
-  function showError() {
-    errorText.textContent = "Couldn't find a definition for that word. Please check your spelling!";
+  function showError(msg) {
+    errorText.textContent = msg || "Couldn't find a definition for that word. Please check your spelling!";
     errorBox.classList.add('visible');
   }
   
@@ -607,5 +648,5 @@
 </script>
 
 </body>
-      </html>
-                                                   
+    </html>
+  
