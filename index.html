@@ -461,101 +461,88 @@
     setLoading(true);
     hideError();
 
-    // Extract potential search words (keep letters, spaces, hyphens, and apostrophes)
     const cleaned = query.trim().replace(/[^a-zA-Z\s'-]/g, '');
     const words = cleaned.split(/\s+/).filter(Boolean);
 
     if (words.length === 0) {
-      showError("Please enter a valid English word or phrase.");
+      showError("Please enter a valid English word.");
       setLoading(false);
       return;
     }
 
-    // Attempt searching candidates: full string first, then individual words
-    const candidates = [...new Set([words.join('-'), words.join(''), ...words])];
-    let entry = null;
-    let searchedWord = "";
+    const targetWord = words[0].toLowerCase();
+    let resultData = null;
 
-    for (const word of candidates) {
-      const sanitized = word.replace(/[^a-zA-Z-]/g, '').toLowerCase();
-      if (!sanitized) continue;
+    // 1. Try Primary API (Free Dictionary API)
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(targetWord)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data[0]) {
+          const entry = data[0];
+          const meanings = entry.meanings || [];
+          const primaryMeaning = meanings[0] || {};
+          const primaryDef = (primaryMeaning.definitions && primaryMeaning.definitions[0]) || {};
 
+          let syns = [];
+          meanings.forEach(m => {
+            if (m.synonyms) syns.push(...m.synonyms);
+          });
+
+          resultData = {
+            term: entry.word,
+            pronunciation: entry.phonetic || (entry.phonetics && entry.phonetics.find(p => p.text)?.text) || "",
+            partOfSpeech: primaryMeaning.partOfSpeech || "noun",
+            simple: primaryDef.definition || "No definition found.",
+            explanation: meanings.map(m => `(${m.partOfSpeech}) ${m.definitions[0]?.definition || ''}`).slice(0, 2).join(' '),
+            example: primaryDef.example ? `"${primaryDef.example}"` : "",
+            synonyms: [...new Set(syns)].slice(0, 5)
+          };
+        }
+      }
+    } catch (e) {
+      // Primary API failed, fall through to Backup API
+    }
+
+    // 2. Backup API (Datamuse API)
+    if (!resultData) {
       try {
-        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(sanitized)}`);
+        const res = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(targetWord)}&md=d&max=1`);
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            entry = data[0];
-            searchedWord = sanitized;
-            break;
+          if (Array.isArray(data) && data.length > 0 && data[0].defs) {
+            const item = data[0];
+            const rawDefs = item.defs.map(d => {
+              const parts = d.split('\t');
+              return { pos: parts[0], def: parts[1] };
+            });
+
+            resultData = {
+              term: item.word,
+              pronunciation: "",
+              partOfSpeech: rawDefs[0]?.pos === 'n' ? 'noun' : rawDefs[0]?.pos === 'v' ? 'verb' : rawDefs[0]?.pos === 'adj' ? 'adjective' : 'word',
+              simple: rawDefs[0]?.def || "No simple definition available.",
+              explanation: rawDefs.map(d => `(${d.pos}) ${d.def}`).slice(0, 2).join(' '),
+              example: "",
+              synonyms: []
+            };
           }
         }
       } catch (e) {
-        // Ignore single word failure and continue trying candidates
+        // Backup API failed
       }
     }
 
-    if (!entry) {
-      showError("Couldn't find a definition for that word or phrase. Please check your spelling!");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const meanings = Array.isArray(entry.meanings) ? entry.meanings : [];
-      const primaryMeaning = meanings[0] || {};
-      const primaryDef = (primaryMeaning.definitions && primaryMeaning.definitions[0]) || {};
-
-      let syns = [];
-      meanings.forEach(m => {
-        if (Array.isArray(m.synonyms)) syns.push(...m.synonyms);
-        if (Array.isArray(m.definitions)) {
-          m.definitions.forEach(d => {
-            if (Array.isArray(d.synonyms)) syns.push(...d.synonyms);
-          });
-        }
-      });
-      syns = [...new Set(syns)].slice(0, 5);
-
-      let exampleText = "";
-      for (const m of meanings) {
-        if (Array.isArray(m.definitions)) {
-          for (const d of m.definitions) {
-            if (d.example) {
-              exampleText = d.example;
-              break;
-            }
-          }
-        }
-        if (exampleText) break;
-      }
-
-      let phoneticsText = entry.phonetic || "";
-      if (!phoneticsText && Array.isArray(entry.phonetics)) {
-        const pObj = entry.phonetics.find(p => p && p.text);
-        if (pObj) phoneticsText = pObj.text;
-      }
-
-      const parsed = {
-        term: entry.word || searchedWord,
-        pronunciation: phoneticsText,
-        partOfSpeech: primaryMeaning.partOfSpeech || "",
-        simple: primaryDef.definition || "No simple definition available.",
-        explanation: meanings.map(m => `(${m.partOfSpeech || 'def'}) ${m.definitions?.[0]?.definition || ''}`).filter(b => b.trim().length > 6).slice(0, 2).join(' '),
-        example: exampleText ? `"${exampleText}"` : "",
-        synonyms: syns
-      };
-
-      renderResult(parsed);
-      pushHistory(query, parsed);
+    if (resultData) {
+      renderResult(resultData);
+      pushHistory(query, resultData);
       input.value = '';
       input.style.height = 'auto';
-
-    } catch (err) {
-      showError("An unexpected error occurred while parsing the word definition.");
-    } finally {
-      setLoading(false);
+    } else {
+      showError("Couldn't find a definition. Check your connection or spelling!");
     }
+
+    setLoading(false);
   }
 
   function setLoading(isLoading) {
@@ -574,7 +561,6 @@
 
   function renderResult(data) {
     emptyState.style.display = 'none';
-
     document.getElementById('out-term').textContent = data.term || '';
 
     const metaParts = [data.partOfSpeech, data.pronunciation].filter(Boolean);
@@ -611,12 +597,6 @@
       synLabel.style.display = 'none';
     }
 
-    const svg = document.getElementById('out-underline');
-    const path = svg.querySelector('path');
-    path.style.animation = 'none';
-    void path.offsetWidth;
-    path.style.animation = null;
-
     resultEl.classList.add('visible');
   }
 
@@ -648,5 +628,5 @@
 </script>
 
 </body>
-    </html>
-  
+  </html>
+      
