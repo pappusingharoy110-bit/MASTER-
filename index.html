@@ -369,7 +369,7 @@
 
   <footer class="site-footer">
     <p>Made by Pappu Singha Roy</p>
-    <p class="footer-subtext">The part of edu-art-group</p>
+    <p class="footer-subtext">The part of Education & Art Store</p>
   </footer>
 </div>
 
@@ -454,15 +454,15 @@
         audioUrl: null
       };
     } 
-    // 3. Process single words safely
+    // 3. Process single words safely with Backup API
     else if (words.length === 1) {
       document.getElementById('loading-text').textContent = "Finding simple definition…";
-      
-      // Force lowercase to stop the API from failing on capital letters
       const searchWord = words[0].toLowerCase(); 
       
       try {
+        // Try Primary Dictionary
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(searchWord)}`);
+        
         if (res.ok) {
           const data = await res.json();
           const entry = data[0];
@@ -471,7 +471,6 @@
           let bestExample = "";
           let partOfSpeech = "word";
           
-          // Safely collect all definitions across all meanings
           let allDefs = [];
           if (entry.meanings && entry.meanings.length > 0) {
              partOfSpeech = entry.meanings[0].partOfSpeech || "word";
@@ -513,9 +512,32 @@
             audioUrl: audioUrl,
             audioText: entry.word
           };
+        } else {
+          // PRIMARY FAILED: Try Backup Dictionary (Great for slang like "Yep")
+          const backupRes = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(searchWord)}&md=d&max=1`);
+          if (backupRes.ok) {
+            const backupData = await backupRes.json();
+            if (backupData.length > 0 && backupData[0].defs) {
+              const item = backupData[0];
+              const rawDefParts = item.defs[0].split('\t');
+              const pos = rawDefParts[0] === 'n' ? 'noun' : rawDefParts[0] === 'v' ? 'verb' : rawDefParts[0] === 'adj' ? 'adjective' : 'word';
+              const defText = rawDefParts[1];
+
+              resultData = {
+                term: originalBengali ? `${originalBengali} (${item.word})` : item.word,
+                pronunciation: "",
+                partOfSpeech: pos,
+                simple: originalBengali ? `English: "${translatedEnglish}"` : defText,
+                explanation: originalBengali ? defText : "This is the most direct, plain-English meaning of the word.",
+                example: "",
+                audioUrl: null,
+                audioText: item.word
+              };
+            }
+          }
         }
       } catch (e) {
-        console.log("Dictionary API failed", e);
+        console.log("Dictionary APIs failed", e);
       }
     }
 
@@ -564,4 +586,4 @@
 </script>
 </body>
       </html>
-  
+    
