@@ -380,7 +380,6 @@
   let currentAudioUrl = null;
   let currentWordToSpeak = "";
 
-  // Auto-resize textarea
   input.addEventListener('input', () => {
     input.style.height = 'auto';
     input.style.height = (input.scrollHeight) + 'px';
@@ -395,7 +394,6 @@
 
   submitBtn.addEventListener('click', () => runQuery(input.value));
 
-  // Audio playback handler
   document.getElementById('play-audio-btn').addEventListener('click', () => {
     if (currentAudioUrl) {
       new Audio(currentAudioUrl).play();
@@ -422,7 +420,7 @@
     let translatedEnglish = '';
     let targetText = searchStr;
 
-    // 1. Handle Bengali Translation first
+    // 1. Handle Bengali Translation
     if (isBengaliText(searchStr)) {
       document.getElementById('loading-text').textContent = "Translating from Bengali…";
       originalBengali = searchStr;
@@ -442,7 +440,7 @@
     const isSentence = words.length > 1;
     let resultData = null;
 
-    // 2. Fast-track sentences
+    // 2. Sentences
     if (isSentence) {
       resultData = {
         term: originalBengali || targetText,
@@ -454,15 +452,16 @@
         audioUrl: null
       };
     } 
-    // 3. Process single words safely with Backup API
+    // 3. Single Words
     else if (words.length === 1) {
       document.getElementById('loading-text').textContent = "Finding simple definition…";
       const searchWord = words[0].toLowerCase(); 
       
+      let foundDefinition = false;
+
+      // ATTEMPT A: Primary Dictionary
       try {
-        // Try Primary Dictionary
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(searchWord)}`);
-        
         if (res.ok) {
           const data = await res.json();
           const entry = data[0];
@@ -470,32 +469,27 @@
           let bestDef = "No clear definition found.";
           let bestExample = "";
           let partOfSpeech = "word";
-          
           let allDefs = [];
+          
           if (entry.meanings && entry.meanings.length > 0) {
              partOfSpeech = entry.meanings[0].partOfSpeech || "word";
              entry.meanings.forEach(m => {
-               if (m.definitions) {
-                 allDefs.push(...m.definitions);
-               }
+               if (m.definitions) allDefs.push(...m.definitions);
              });
           }
 
           if (allDefs.length > 0) {
-             // Safely sort by length to find the simplest plain-English definition
              allDefs.sort((a, b) => (a.definition?.length || 999) - (b.definition?.length || 999));
              bestDef = allDefs[0].definition || bestDef;
              bestExample = allDefs[0].example || (allDefs[1] && allDefs[1].example) || "";
           }
 
-          // Safely grab audio
           let audioUrl = null;
           if (entry.phonetics) {
             const validAudio = entry.phonetics.find(p => p.audio && p.audio.length > 0);
             if (validAudio) audioUrl = validAudio.audio;
           }
 
-          // Safely grab pronunciation text fallback
           let phoneticText = entry.phonetic || "";
           if (!phoneticText && entry.phonetics) {
              const validPhonetic = entry.phonetics.find(p => p.text);
@@ -512,16 +506,29 @@
             audioUrl: audioUrl,
             audioText: entry.word
           };
-        } else {
-          // PRIMARY FAILED: Try Backup Dictionary (Great for slang like "Yep")
+          foundDefinition = true;
+        }
+      } catch (e) {
+        console.log("Primary API failed, safely moving to backup...");
+      }
+
+      // ATTEMPT B: Backup Dictionary
+      if (!foundDefinition) {
+        try {
           const backupRes = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(searchWord)}&md=d&max=1`);
           if (backupRes.ok) {
             const backupData = await backupRes.json();
             if (backupData.length > 0 && backupData[0].defs) {
               const item = backupData[0];
               const rawDefParts = item.defs[0].split('\t');
-              const pos = rawDefParts[0] === 'n' ? 'noun' : rawDefParts[0] === 'v' ? 'verb' : rawDefParts[0] === 'adj' ? 'adjective' : 'word';
-              const defText = rawDefParts[1];
+              
+              let pos = 'word';
+              let defText = item.defs[0];
+              
+              if (rawDefParts.length > 1) {
+                pos = rawDefParts[0] === 'n' ? 'noun' : rawDefParts[0] === 'v' ? 'verb' : rawDefParts[0] === 'adj' ? 'adjective' : rawDefParts[0] === 'adv' ? 'adverb' : 'word';
+                defText = rawDefParts[1];
+              }
 
               resultData = {
                 term: originalBengali ? `${originalBengali} (${item.word})` : item.word,
@@ -535,12 +542,13 @@
               };
             }
           }
+        } catch (e) {
+          console.log("Backup API also failed.");
         }
-      } catch (e) {
-        console.log("Dictionary APIs failed", e);
       }
     }
 
+    // 4. Render or Error
     if (resultData) {
       renderResult(resultData);
     } else {
@@ -561,7 +569,6 @@
     document.getElementById('out-simple').textContent = data.simple;
     document.getElementById('out-explanation').textContent = data.explanation;
 
-    // Handle Example Section
     const exContainer = document.getElementById('example-container');
     if (data.example) {
       document.getElementById('out-example').textContent = data.example;
@@ -570,10 +577,8 @@
       exContainer.style.display = 'none';
     }
 
-    // Audio State Setup
     currentAudioUrl = data.audioUrl;
     currentWordToSpeak = data.audioText;
-
     resultEl.classList.add('visible');
   }
 
@@ -585,5 +590,4 @@
   }
 </script>
 </body>
-      </html>
-    
+</html>
