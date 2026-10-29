@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plainly — a plain-English dictionary</title>
+<title>Plainly - a plain-English dictionary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+Bengali:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
   :root {
     --paper: #F8F7F3;
@@ -29,7 +29,7 @@
     padding: 0;
     background: linear-gradient(135deg, var(--paper) 0%, #EFECE3 100%);
     color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     min-height: 100vh;
   }
 
@@ -70,7 +70,7 @@
     margin: 0;
   }
 
-  /* Input area with upgraded focus state */
+  /* Input area */
   .input-card {
     position: relative;
     margin-bottom: 8px;
@@ -81,7 +81,7 @@
     border: 1px solid var(--rule);
     transition: box-shadow 0.2s ease;
   }
-  
+
   .input-card:focus-within {
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
     border-color: rgba(37, 99, 235, 0.3);
@@ -92,7 +92,7 @@
     resize: none;
     border: none;
     background: transparent;
-    font-family: 'Source Serif 4', serif;
+    font-family: 'Source Serif 4', 'Noto Sans Bengali', serif;
     font-size: 22px;
     line-height: 1.5;
     color: var(--ink);
@@ -128,8 +128,8 @@
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
   }
 
-  button#submit-btn:hover { 
-    background: var(--accent-dim); 
+  button#submit-btn:hover {
+    background: var(--accent-dim);
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
   }
@@ -141,13 +141,14 @@
     cursor: not-allowed;
   }
 
-  /* Audio Button */
+  /* Audio buttons */
   .play-btn {
     background: #EEF2FF;
     border: 1px solid #C7D2FE;
     border-radius: 50%;
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,10 +156,16 @@
     font-size: 18px;
     transition: all 0.2s ease;
     color: var(--accent);
+    padding: 0;
   }
   .play-btn:hover {
     background: #E0E7FF;
     transform: scale(1.05);
+  }
+  .play-btn.mini {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
   }
 
   /* empty state */
@@ -212,11 +219,12 @@
   }
 
   .term {
-    font-family: 'Source Serif 4', serif;
+    font-family: 'Source Serif 4', 'Noto Sans Bengali', serif;
     font-weight: 600;
     font-size: 32px;
     color: var(--ink);
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .meta-tags { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
@@ -239,24 +247,35 @@
   }
   @keyframes draw { to { stroke-dashoffset: 0; } }
 
-  .simple {
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 19px;
-    line-height: 1.5;
-    color: var(--ink);
-    margin: 20px 0 0 0;
-  }
-
   .section-label {
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--ink-soft);
-    margin: 28px 0 8px 0;
+    margin: 26px 0 8px 0;
   }
 
+  /* Bengali meaning (big) */
+  .simple {
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .alt-line {
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 6px 0 0 0;
+  }
+
+  /* English meaning */
   .explanation {
     font-size: 16px;
     line-height: 1.7;
@@ -268,16 +287,59 @@
     border-left: 3px solid var(--accent);
   }
 
-  .example {
+  .more-list {
+    list-style: none;
+    margin: 10px 0 0 0;
+    padding: 0;
+  }
+  .more-list li {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--rule);
+    margin-bottom: 6px;
+  }
+  .more-list .pos {
+    font-weight: 600;
+    color: var(--accent);
+    margin-right: 6px;
+  }
+
+  /* Example sentences */
+  .sent-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .sent-item {
+    padding: 14px 16px;
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: 6px;
+  }
+  .sent-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .sent-en {
     font-family: 'Source Serif 4', serif;
     font-style: italic;
     font-size: 17px;
-    line-height: 1.6;
+    line-height: 1.55;
     color: var(--ink);
     margin: 0;
-    padding: 16px;
-    background: rgba(251, 191, 36, 0.1);
-    border-radius: 6px;
+  }
+  .sent-bn {
+    font-family: 'Noto Sans Bengali', 'Inter', sans-serif;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 6px 0 0 0;
+  }
+  .note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 10px 0 0 0;
+    line-height: 1.5;
   }
 
   /* Loading & Error */
@@ -291,12 +353,12 @@
   .pencil-dots span:nth-child(2) { animation-delay: 0.15s; }
   .pencil-dots span:nth-child(3) { animation-delay: 0.3s; }
   @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
-  
+
   .error-box {
     display: none; margin-top: 20px; padding: 16px; border-radius: 6px; border-left: 4px solid var(--danger); background: #FEF2F2;
   }
   .error-box.visible { display: block; animation: slideUp 0.3s ease; }
-  .error-box p { margin: 0 0 10px 0; font-size: 14.5px; color: var(--danger); }
+  .error-box p { margin: 0; font-size: 14.5px; color: var(--danger); }
 
   /* footer styling */
   .site-footer {
@@ -307,7 +369,13 @@
     font-size: 14px;
     color: var(--ink-soft);
   }
-  .footer-subtext { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+  .site-footer p { margin: 0; }
+  .footer-subtext { font-size: 12px; opacity: 0.8; margin-top: 4px !important; }
+
+  @media (max-width: 480px) {
+    .result-card { padding: 22px; }
+    .term { font-size: 27px; }
+  }
 </style>
 </head>
 <body>
@@ -319,16 +387,16 @@
   </header>
 
   <div class="input-card">
-    <textarea id="term-input" placeholder="Paste a word or sentence in English or Bengali..." rows="1"></textarea>
+    <textarea id="term-input" placeholder="Type a word or sentence in English or Bengali..." rows="1" maxlength="500"></textarea>
     <div class="input-row">
       <span class="hint">Press Enter to explain</span>
-      <button id="submit-btn">Explain it</button>
+      <button id="submit-btn" type="button">Explain it</button>
     </div>
   </div>
 
   <div class="loading-row" id="loading-row">
     <span class="pencil-dots"><span></span><span></span><span></span></span>
-    <span id="loading-text">Looking it up…</span>
+    <span id="loading-text">Looking it up...</span>
   </div>
 
   <div class="error-box" id="error-box">
@@ -336,7 +404,7 @@
   </div>
 
   <div class="empty-state" id="empty-state">
-    <p>Paste a tricky word or a full sentence, and I'll break it down into plain English with clear examples.</p>
+    <p>Type a word and I'll show its Bengali meaning, its English meaning, and example sentences. Type a full sentence and I'll translate it.</p>
   </div>
 
   <div class="result" id="result">
@@ -346,248 +414,574 @@
           <h2 class="term" id="out-term"></h2>
           <span class="meta-tags" id="out-meta"></span>
         </div>
-        <button id="play-audio-btn" class="play-btn" title="Listen to pronunciation">🔊</button>
+        <button id="play-audio-btn" class="play-btn" type="button" title="Listen to pronunciation" aria-label="Listen to pronunciation">&#128266;</button>
       </div>
-      
+
       <svg class="underline-svg" viewBox="0 0 260 10" preserveAspectRatio="none">
         <path d="M4,6 C60,2 200,2 256,6" />
       </svg>
-      
-      <p class="simple" id="out-simple"></p>
 
-      <div id="explanation-container">
-        <p class="section-label">In plain terms</p>
-        <p class="explanation" id="out-explanation"></p>
+      <div id="block-bn">
+        <p class="section-label" id="label-bn">Bengali meaning</p>
+        <p class="simple" id="out-bn"></p>
+        <p class="alt-line" id="out-bn-alt"></p>
       </div>
 
-      <div id="example-container">
-        <p class="section-label">Example</p>
-        <p class="example" id="out-example"></p>
+      <div id="block-en">
+        <p class="section-label">English meaning</p>
+        <p class="explanation" id="out-en"></p>
+        <ul class="more-list" id="out-en-more"></ul>
+      </div>
+
+      <div id="block-ex">
+        <p class="section-label">Example sentences</p>
+        <div class="sent-list" id="out-sentences"></div>
+        <p class="note" id="out-note"></p>
       </div>
     </div>
   </div>
 
   <footer class="site-footer">
     <p>Made by Pappu Singha Roy</p>
-    <p class="footer-subtext">The part of Education & Art Store</p>
+    <p class="footer-subtext">The part of Education &amp; Art Store</p>
   </footer>
 </div>
 
 <script>
-  const input = document.getElementById('term-input');
-  const submitBtn = document.getElementById('submit-btn');
-  const resultEl = document.getElementById('result');
-  let currentAudioUrl = null;
-  let currentWordToSpeak = "";
+(function () {
+  'use strict';
 
-  input.addEventListener('input', () => {
+  var $ = function (id) { return document.getElementById(id); };
+
+  var input = $('term-input');
+  var submitBtn = $('submit-btn');
+  var resultEl = $('result');
+
+  var currentAudioUrl = null;
+  var currentWordToSpeak = '';
+  var runId = 0;
+
+  /* ---------- small helpers ---------- */
+
+  function isBengaliText(str) { return /[\u0980-\u09FF]/.test(str); }
+
+  function cleanWords(str) {
+    return str.replace(/[^a-zA-Z\s'-]/g, ' ').split(/\s+/).filter(Boolean);
+  }
+
+  function unique(list) {
+    var seen = {};
+    var out = [];
+    list.forEach(function (item) {
+      var key = String(item).toLowerCase();
+      if (item && !seen[key]) { seen[key] = true; out.push(item); }
+    });
+    return out;
+  }
+
+  function capFirst(s) {
+    s = String(s || '').trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  }
+
+  // Make a sentence look finished: capital letter, ends with punctuation.
+  function tidySentence(s) {
+    s = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!s) return '';
+    s = capFirst(s);
+    if (!/[.!?\u2026"')]$/.test(s)) s += '.';
+    return s;
+  }
+
+  // fetch that never throws: returns parsed JSON, or null on any failure
+  function fetchJson(url, ms) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms || 8000);
+    return fetch(url, { signal: ctrl.signal })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .catch(function () { return null; })
+      .then(function (data) { clearTimeout(timer); return data; });
+  }
+
+  /* ---------- translation (Google, free endpoint) ---------- */
+
+  // Returns { text, alts } or null if it failed.
+  function gTranslate(text, from, to) {
+    var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + from +
+              '&tl=' + to + '&dt=t&dt=bd&q=' + encodeURIComponent(text);
+    return fetchJson(url, 8000).then(function (data) {
+      if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
+      var main = data[0].map(function (part) { return part && part[0] ? part[0] : ''; }).join('').trim();
+      var alts = [];
+      if (Array.isArray(data[1])) {
+        data[1].forEach(function (group) {
+          if (group && Array.isArray(group[1])) {
+            group[1].forEach(function (t) { alts.push(t); });
+          }
+        });
+      }
+      return { text: main, alts: alts };
+    });
+  }
+
+  /* ---------- English dictionary lookup ---------- */
+
+  var POS_SHORT = { n: 'noun', v: 'verb', adj: 'adjective', adv: 'adverb', u: 'word' };
+
+  function lookupDictionaryApi(word) {
+    return fetchJson('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word), 8000)
+      .then(function (data) {
+        if (!Array.isArray(data) || !data.length) return null;
+
+        var meanings = [];
+        var phonetic = '';
+        var audioUrl = null;
+
+        data.forEach(function (entry) {
+          (entry.meanings || []).forEach(function (m) { meanings.push(m); });
+          if (!phonetic && entry.phonetic) phonetic = entry.phonetic;
+          (entry.phonetics || []).forEach(function (p) {
+            if (!audioUrl && p.audio) audioUrl = p.audio;
+            if (!phonetic && p.text) phonetic = p.text;
+          });
+        });
+        if (!meanings.length) return null;
+        if (audioUrl && audioUrl.indexOf('//') === 0) audioUrl = 'https:' + audioUrl;
+
+        // Main meaning: shortest of the first three definitions of the first part of speech
+        var first = meanings[0];
+        var firstDefs = (first.definitions || []).filter(function (d) { return d.definition; }).slice(0, 3);
+        if (!firstDefs.length) return null;
+        var main = firstDefs.slice().sort(function (a, b) {
+          return a.definition.length - b.definition.length;
+        })[0].definition;
+
+        // Extra meanings: first definition of the other parts of speech
+        var more = [];
+        meanings.slice(1).forEach(function (m) {
+          var d = (m.definitions || [])[0];
+          if (d && d.definition && more.length < 2) {
+            more.push({ pos: m.partOfSpeech || 'word', text: d.definition });
+          }
+        });
+        if (more.length < 2) {
+          firstDefs.forEach(function (d) {
+            if (d.definition !== main && more.length < 2) {
+              more.push({ pos: first.partOfSpeech || 'word', text: d.definition });
+            }
+          });
+        }
+
+        // Example sentences written by the dictionary
+        var examples = [];
+        meanings.forEach(function (m) {
+          (m.definitions || []).forEach(function (d) {
+            if (d.example) examples.push(d.example);
+          });
+        });
+
+        return {
+          word: data[0].word || word,
+          pos: first.partOfSpeech || 'word',
+          pron: phonetic,
+          audioUrl: audioUrl,
+          main: main,
+          more: more,
+          examples: examples
+        };
+      });
+  }
+
+  function lookupDatamuse(word) {
+    return fetchJson('https://api.datamuse.com/words?sp=' + encodeURIComponent(word) + '&md=d&max=1', 8000)
+      .then(function (data) {
+        if (!Array.isArray(data) || !data.length) return null;
+        var item = data[0];
+        if (!item.defs || !item.defs.length) return null;
+        if (String(item.word).toLowerCase() !== word.toLowerCase()) return null;
+
+        var parts = item.defs.map(function (s) {
+          var i = s.indexOf('\t');
+          if (i > 0) return { pos: POS_SHORT[s.slice(0, i)] || 'word', text: s.slice(i + 1) };
+          return { pos: 'word', text: s };
+        });
+
+        return {
+          word: item.word,
+          pos: parts[0].pos,
+          pron: '',
+          audioUrl: null,
+          main: parts[0].text,
+          more: parts.slice(1, 3),
+          examples: []
+        };
+      });
+  }
+
+  function lookupEnglish(word) {
+    return lookupDictionaryApi(word).then(function (d) {
+      return d || lookupDatamuse(word);
+    });
+  }
+
+  /* ---------- example sentences ---------- */
+
+  // Real sentences from Tatoeba (optional; fails quietly)
+  function lookupTatoeba(word, need) {
+    var url = 'https://tatoeba.org/en/api_v0/search?from=eng&orphans=no&unapproved=no&sort=relevance&query=' +
+              encodeURIComponent(word);
+    return fetchJson(url, 6000).then(function (data) {
+      if (!data || !Array.isArray(data.results)) return [];
+      var safe = word.replace(/[^a-zA-Z'-]/g, '');
+      if (!safe) return [];
+      var re = new RegExp('\\b' + safe + '\\b', 'i');
+      var found = data.results
+        .map(function (r) { return r && r.text ? String(r.text) : ''; })
+        .filter(function (t) { return t.length >= 18 && t.length <= 110 && re.test(t); });
+      found.sort(function (a, b) { return a.length - b.length; });
+      return found.slice(0, need);
+    });
+  }
+
+  // Last resort: simple practice sentences built from the word
+  function templateSentences(word, pos) {
+    var w = word;
+    var sets = {
+      noun: [
+        'Can you tell me more about the ' + w + '?',
+        'We talked about the ' + w + ' for a long time.',
+        'Nobody expected the ' + w + ' to matter so much.'
+      ],
+      verb: [
+        'Please ' + w + ' when you are ready.',
+        'They decided to ' + w + ' this time.',
+        'It is hard to ' + w + ' without help.'
+      ],
+      adjective: [
+        'It was a very ' + w + ' day.',
+        'She felt ' + w + ' after hearing the news.',
+        'Nothing seemed as ' + w + ' as that moment.'
+      ],
+      adverb: [
+        'He answered ' + w + '.',
+        'She did it ' + w + ' and without help.',
+        'They moved ' + w + ' through the room.'
+      ]
+    };
+    var fallback = [
+      'I learned the word "' + w + '" today.',
+      'Can you use "' + w + '" in a sentence?',
+      'The teacher explained the word "' + w + '" to us.'
+    ];
+    return sets[pos] || fallback;
+  }
+
+  // Collect up to 3 sentences: dictionary first, then Tatoeba, then practice sentences
+  function collectSentences(word, dict, setStatus) {
+    var list = [];
+    var seen = {};
+
+    function add(text, auto) {
+      var s = tidySentence(text);
+      var key = s.toLowerCase();
+      if (!s || s.length < 8 || s.length > 160 || seen[key] || list.length >= 3) return;
+      seen[key] = true;
+      list.push({ en: s, bn: '', auto: auto });
+    }
+
+    ((dict && dict.examples) || []).forEach(function (e) { add(e, false); });
+
+    var step = Promise.resolve([]);
+    if (list.length < 3) {
+      setStatus('Finding example sentences...');
+      step = lookupTatoeba(word, 8); // fetch extra, duplicates are skipped by add()
+    }
+
+    return step.then(function (extra) {
+      extra.forEach(function (e) { add(e, false); });
+      if (list.length < 3) {
+        templateSentences(word, dict ? dict.pos : '').forEach(function (e) { add(e, true); });
+      }
+      return list;
+    });
+  }
+
+  function translateSentences(list) {
+    return Promise.all(list.map(function (item) {
+      return gTranslate(item.en, 'en', 'bn').then(function (tr) {
+        item.bn = tr && tr.text ? tr.text : '';
+      });
+    })).then(function () { return list; });
+  }
+
+  /* ---------- main logic ---------- */
+
+  function wordFlow(word, originalBn, setStatus) {
+    setStatus('Finding the meanings...');
+    return Promise.all([
+      gTranslate(word, 'en', 'bn'),
+      lookupEnglish(word)
+    ]).then(function (res) {
+      var bnRes = res[0];
+      var dict = res[1];
+
+      var bnMain = '';
+      if (originalBn) {
+        bnMain = originalBn;
+      } else if (bnRes && bnRes.text && bnRes.text.toLowerCase() !== word.toLowerCase()) {
+        bnMain = bnRes.text;
+      }
+
+      // Other Bengali words with a similar meaning
+      var pool = [];
+      if (originalBn && bnRes && bnRes.text) pool.push(bnRes.text);
+      if (bnRes) pool = pool.concat(bnRes.alts);
+      var bnAlt = unique(pool).filter(function (t) {
+        return t !== bnMain && t.toLowerCase() !== word.toLowerCase();
+      }).slice(0, 4);
+
+      if (!dict && !bnMain) return null;
+
+      var shownWord = dict ? dict.word : word;
+
+      return collectSentences(word, dict, setStatus).then(function (sentences) {
+        setStatus('Translating the sentences...');
+        return translateSentences(sentences);
+      }).then(function (sentences) {
+        return {
+          mode: 'word',
+          term: originalBn ? originalBn + ' (' + shownWord + ')' : shownWord,
+          pos: dict ? dict.pos : '',
+          pron: dict ? dict.pron : '',
+          bnLabel: 'Bengali meaning',
+          bn: bnMain || 'Bengali meaning is not available right now.',
+          bnAlt: bnAlt,
+          en: dict ? capFirst(dict.main) : 'No English definition was found for this word.',
+          enMore: dict ? dict.more : [],
+          sentences: sentences,
+          audioUrl: dict ? dict.audioUrl : null,
+          audioText: shownWord
+        };
+      });
+    });
+  }
+
+  function buildResult(query, setStatus) {
+    var q = query.slice(0, 500);
+
+    // ----- Bengali input -----
+    if (isBengaliText(q)) {
+      setStatus('Translating from Bengali...');
+      return gTranslate(q, 'bn', 'en').then(function (tr) {
+        if (!tr || !tr.text) throw new Error('Translation failed. Please check your connection.');
+        var english = tr.text;
+        var tokens = q.split(/\s+/).filter(Boolean);
+        var words = cleanWords(english);
+
+        if (tokens.length === 1 && words.length === 1) {
+          return wordFlow(words[0].toLowerCase(), q, setStatus);
+        }
+        return {
+          mode: 'text',
+          term: q,
+          pos: 'Sentence / phrase',
+          pron: '',
+          bnLabel: 'English translation',
+          bn: english,
+          bnAlt: [],
+          audioUrl: null,
+          audioText: english
+        };
+      });
+    }
+
+    // ----- English input -----
+    var words = cleanWords(q);
+    if (!words.length) return Promise.resolve(null);
+
+    if (words.length === 1) {
+      return wordFlow(words[0].toLowerCase(), '', setStatus);
+    }
+
+    setStatus('Translating to Bengali...');
+    return gTranslate(q, 'en', 'bn').then(function (tr) {
+      if (!tr || !tr.text) throw new Error('Translation failed. Please check your connection.');
+      return {
+        mode: 'text',
+        term: q,
+        pos: 'Sentence / phrase',
+        pron: '',
+        bnLabel: 'Bengali translation',
+        bn: tr.text,
+        bnAlt: [],
+        audioUrl: null,
+        audioText: q
+      };
+    });
+  }
+
+  function runQuery(raw) {
+    var query = (raw || '').trim();
+    if (!query) return;
+
+    var myRun = ++runId;
+
+    $('error-box').classList.remove('visible');
+    $('empty-state').style.display = 'none';
+    resultEl.classList.remove('visible');
+    submitBtn.disabled = true;
+    $('loading-row').classList.add('visible');
+
+    function setStatus(msg) {
+      if (myRun === runId) $('loading-text').textContent = msg;
+    }
+    setStatus('Looking it up...');
+
+    return buildResult(query, setStatus).then(function (data) {
+      if (myRun !== runId) return;
+      if (data) {
+        renderResult(data);
+      } else {
+        showError("Couldn't find a simple definition for that.");
+      }
+    }).catch(function (err) {
+      if (myRun !== runId) return;
+      showError(err && err.message ? err.message : 'Something went wrong. Please try again.');
+    }).then(function () {
+      if (myRun !== runId) return;
+      submitBtn.disabled = false;
+      $('loading-row').classList.remove('visible');
+    });
+  }
+
+  /* ---------- rendering ---------- */
+
+  function show(id, on) { $(id).style.display = on ? 'block' : 'none'; }
+
+  function speak(text, lang) {
+    if (text && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || 'en-US';
+      window.speechSynthesis.speak(u);
+    }
+  }
+
+  function makeSpeakButton(text) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'play-btn mini';
+    b.title = 'Listen';
+    b.setAttribute('aria-label', 'Listen');
+    b.innerHTML = '&#128266;';
+    b.addEventListener('click', function () { speak(text, 'en-US'); });
+    return b;
+  }
+
+  function renderResult(d) {
+    $('out-term').textContent = d.term;
+    $('out-meta').textContent = [d.pos, d.pron].filter(Boolean).join(' \u00b7 ');
+
+    // Bengali block
+    $('label-bn').textContent = d.bnLabel;
+    $('out-bn').textContent = d.bn;
+    var altEl = $('out-bn-alt');
+    if (d.bnAlt && d.bnAlt.length) {
+      altEl.textContent = 'Also: ' + d.bnAlt.join(', ');
+      altEl.style.display = 'block';
+    } else {
+      altEl.textContent = '';
+      altEl.style.display = 'none';
+    }
+
+    // English block + sentences (only for single words)
+    var isWord = d.mode === 'word';
+    show('block-en', isWord);
+    show('block-ex', isWord && d.sentences && d.sentences.length > 0);
+
+    if (isWord) {
+      $('out-en').textContent = d.en;
+
+      var moreEl = $('out-en-more');
+      moreEl.innerHTML = '';
+      (d.enMore || []).forEach(function (m) {
+        var li = document.createElement('li');
+        var pos = document.createElement('span');
+        pos.className = 'pos';
+        pos.textContent = m.pos;
+        li.appendChild(pos);
+        li.appendChild(document.createTextNode(capFirst(m.text)));
+        moreEl.appendChild(li);
+      });
+
+      var listEl = $('out-sentences');
+      listEl.innerHTML = '';
+      var hasAuto = false;
+      (d.sentences || []).forEach(function (s) {
+        if (s.auto) hasAuto = true;
+        var item = document.createElement('div');
+        item.className = 'sent-item';
+
+        var main = document.createElement('div');
+        main.className = 'sent-main';
+        var en = document.createElement('p');
+        en.className = 'sent-en';
+        en.textContent = s.en;
+        main.appendChild(en);
+        main.appendChild(makeSpeakButton(s.en));
+        item.appendChild(main);
+
+        if (s.bn) {
+          var bn = document.createElement('p');
+          bn.className = 'sent-bn';
+          bn.textContent = s.bn;
+          item.appendChild(bn);
+        }
+        listEl.appendChild(item);
+      });
+      $('out-note').textContent = hasAuto
+        ? 'Some sentences are simple practice sentences made from the word, because no real example was found.'
+        : '';
+    }
+
+    currentAudioUrl = d.audioUrl || null;
+    currentWordToSpeak = d.audioText || '';
+    resultEl.classList.add('visible');
+  }
+
+  function showError(msg) {
+    $('error-text').textContent = msg;
+    $('error-box').classList.add('visible');
+    submitBtn.disabled = false;
+    $('loading-row').classList.remove('visible');
+  }
+
+  /* ---------- events ---------- */
+
+  input.addEventListener('input', function () {
     input.style.height = 'auto';
-    input.style.height = (input.scrollHeight) + 'px';
+    input.style.height = input.scrollHeight + 'px';
   });
 
-  input.addEventListener('keydown', (e) => {
+  input.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       runQuery(input.value);
     }
   });
 
-  submitBtn.addEventListener('click', () => runQuery(input.value));
+  submitBtn.addEventListener('click', function () { runQuery(input.value); });
 
-  document.getElementById('play-audio-btn').addEventListener('click', () => {
+  $('play-audio-btn').addEventListener('click', function () {
     if (currentAudioUrl) {
-      new Audio(currentAudioUrl).play();
-    } else if (currentWordToSpeak && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(currentWordToSpeak);
-      window.speechSynthesis.speak(utterance);
+      var audio = new Audio(currentAudioUrl);
+      var p = audio.play();
+      if (p && p.catch) p.catch(function () { speak(currentWordToSpeak, 'en-US'); });
+    } else {
+      speak(currentWordToSpeak, 'en-US');
     }
   });
-
-  function isBengaliText(str) { return /[\u0980-\u09FF]/.test(str); }
-
-  async function runQuery(query) {
-    const searchStr = query.trim();
-    if (!searchStr) return;
-    
-    document.getElementById('error-box').classList.remove('visible');
-    document.getElementById('empty-state').style.display = 'none';
-    resultEl.classList.remove('visible');
-    
-    submitBtn.disabled = true;
-    document.getElementById('loading-row').classList.add('visible');
-
-    let originalBengali = '';
-    let translatedEnglish = '';
-    let targetText = searchStr;
-
-    // 1. Handle Bengali Translation
-    if (isBengaliText(searchStr)) {
-      document.getElementById('loading-text').textContent = "Translating from Bengali…";
-      originalBengali = searchStr;
-      try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=bn&tl=en&dt=t&q=${encodeURIComponent(searchStr)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        translatedEnglish = data[0].map(item => item[0]).join('').trim();
-        targetText = translatedEnglish;
-      } catch (e) {
-        showError("Translation failed. Check connection.");
-        return;
-      }
-    }
-
-    const words = targetText.replace(/[^a-zA-Z\s'-]/g, '').split(/\s+/).filter(Boolean);
-    const isSentence = words.length > 1;
-    let resultData = null;
-
-    // 2. Sentences
-    if (isSentence) {
-      resultData = {
-        term: originalBengali || targetText,
-        pronunciation: "Sentence / Phrase",
-        partOfSpeech: "",
-        simple: originalBengali ? `Translation: "${translatedEnglish}"` : "This is a full sentence or phrase.",
-        explanation: "Dictionary apps define single words. To understand a complex sentence, try copying just the tricky words one by one.",
-        audioText: targetText,
-        audioUrl: null
-      };
-    } 
-    // 3. Single Words
-    else if (words.length === 1) {
-      document.getElementById('loading-text').textContent = "Finding simple definition…";
-      const searchWord = words[0].toLowerCase(); 
-      
-      let foundDefinition = false;
-
-      // ATTEMPT A: Primary Dictionary
-      try {
-        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(searchWord)}`);
-        if (res.ok) {
-          const data = await res.json();
-          const entry = data[0];
-          
-          let bestDef = "No clear definition found.";
-          let bestExample = "";
-          let partOfSpeech = "word";
-          let allDefs = [];
-          
-          if (entry.meanings && entry.meanings.length > 0) {
-             partOfSpeech = entry.meanings[0].partOfSpeech || "word";
-             entry.meanings.forEach(m => {
-               if (m.definitions) allDefs.push(...m.definitions);
-             });
-          }
-
-          if (allDefs.length > 0) {
-             allDefs.sort((a, b) => (a.definition?.length || 999) - (b.definition?.length || 999));
-             bestDef = allDefs[0].definition || bestDef;
-             bestExample = allDefs[0].example || (allDefs[1] && allDefs[1].example) || "";
-          }
-
-          let audioUrl = null;
-          if (entry.phonetics) {
-            const validAudio = entry.phonetics.find(p => p.audio && p.audio.length > 0);
-            if (validAudio) audioUrl = validAudio.audio;
-          }
-
-          let phoneticText = entry.phonetic || "";
-          if (!phoneticText && entry.phonetics) {
-             const validPhonetic = entry.phonetics.find(p => p.text);
-             if (validPhonetic) phoneticText = validPhonetic.text;
-          }
-
-          resultData = {
-            term: originalBengali ? `${originalBengali} (${entry.word})` : entry.word,
-            pronunciation: phoneticText,
-            partOfSpeech: partOfSpeech,
-            simple: originalBengali ? `English: "${translatedEnglish}"` : bestDef,
-            explanation: originalBengali ? bestDef : "This is the most direct, plain-English meaning of the word.",
-            example: bestExample ? `"${bestExample}"` : "",
-            audioUrl: audioUrl,
-            audioText: entry.word
-          };
-          foundDefinition = true;
-        }
-      } catch (e) {
-        console.log("Primary API failed, safely moving to backup...");
-      }
-
-      // ATTEMPT B: Backup Dictionary
-      if (!foundDefinition) {
-        try {
-          const backupRes = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(searchWord)}&md=d&max=1`);
-          if (backupRes.ok) {
-            const backupData = await backupRes.json();
-            if (backupData.length > 0 && backupData[0].defs) {
-              const item = backupData[0];
-              const rawDefParts = item.defs[0].split('\t');
-              
-              let pos = 'word';
-              let defText = item.defs[0];
-              
-              if (rawDefParts.length > 1) {
-                pos = rawDefParts[0] === 'n' ? 'noun' : rawDefParts[0] === 'v' ? 'verb' : rawDefParts[0] === 'adj' ? 'adjective' : rawDefParts[0] === 'adv' ? 'adverb' : 'word';
-                defText = rawDefParts[1];
-              }
-
-              resultData = {
-                term: originalBengali ? `${originalBengali} (${item.word})` : item.word,
-                pronunciation: "",
-                partOfSpeech: pos,
-                simple: originalBengali ? `English: "${translatedEnglish}"` : defText,
-                explanation: originalBengali ? defText : "This is the most direct, plain-English meaning of the word.",
-                example: "",
-                audioUrl: null,
-                audioText: item.word
-              };
-            }
-          }
-        } catch (e) {
-          console.log("Backup API also failed.");
-        }
-      }
-    }
-
-    // 4. Render or Error
-    if (resultData) {
-      renderResult(resultData);
-    } else {
-      showError("Couldn't find a simple definition for that.");
-    }
-
-    submitBtn.disabled = false;
-    document.getElementById('loading-row').classList.remove('visible');
-    document.getElementById('loading-text').textContent = "Looking it up…";
-  }
-
-  function renderResult(data) {
-    document.getElementById('out-term').textContent = data.term;
-    
-    const metaParts = [data.partOfSpeech, data.pronunciation].filter(Boolean);
-    document.getElementById('out-meta').textContent = metaParts.join(' · ');
-    
-    document.getElementById('out-simple').textContent = data.simple;
-    document.getElementById('out-explanation').textContent = data.explanation;
-
-    const exContainer = document.getElementById('example-container');
-    if (data.example) {
-      document.getElementById('out-example').textContent = data.example;
-      exContainer.style.display = 'block';
-    } else {
-      exContainer.style.display = 'none';
-    }
-
-    currentAudioUrl = data.audioUrl;
-    currentWordToSpeak = data.audioText;
-    resultEl.classList.add('visible');
-  }
-
-  function showError(msg) {
-    document.getElementById('error-text').textContent = msg;
-    document.getElementById('error-box').classList.add('visible');
-    submitBtn.disabled = false;
-    document.getElementById('loading-row').classList.remove('visible');
-  }
+})();
 </script>
 </body>
 </html>
